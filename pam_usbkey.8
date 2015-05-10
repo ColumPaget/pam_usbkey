@@ -1,0 +1,100 @@
+.TH  pam_usbkey  8 " 2015/05/08"
+.SH NAME
+
+.P
+pam_usbkey - Use usbkeys as authentication tokens.
+.SH SYNOPSIS
+
+
+.nf
+
+pam_usbkey.so user=<username> key=<usbkey serial number> [tty=<tty list>] [rhost=<host list>]
+.fi
+.ad b
+.SH DESCRIPTION
+
+.P
+This module can be used to specify that an account can only log in when a certain usbkey is plugged into the system, or it can be used to allow passwordless login to a certain account when a USB key is plugged in. Another use is disallowing 'su' ('switch user', usually used for changing to 'root' superuser) unless a USB key is present.
+.P
+USB keys are identified by their serial number, which can be discovered by reading the 'serial' file in the appropriate device directory under \fB/sys/bus/usb/devices/\fP. The pam_usbkey source comes with a small shell-script that will print out the serial numbers of currently plugged-in USB keys. When a USB key is plugged into the system any user can read its serial number, so it's not a secret from users already on a system who are seeking privilege escalation. However in most use cases the account will still be protected by a password, and  making use of the discovered serial number would either require creating a matching USB key and gaining physical access to the system to plug it in, or else fooling the system into thinking a key is plugged in when it isn't. Achieving this is left as an exercise for the attacker.
+.SH OPTIONS
+
+.TP
+.B
+\fIuser\fP
+Comma-separated list of logins to whom this rule applies. fnmatch (shell) style wildcards can be used. If pam_usbkey is being used to protect 'su' then this user will usually be 'root' or perhaps '*', as this option specifies the user we are trying to become or log in as, not any user that we currently are.
+
+.TP
+.B
+\fItty\fP
+Comma-separated list of ttys on which this rule applies. fnmatch (shell) style wildcards can be used.
+
+.TP
+.B
+\fIrhost\fP
+Comma-separated list of remote hosts to which this rule applies. fnmatch (shell) style wildcards can be used.
+
+.TP
+.B
+\fIkey\fP
+Comma-separated list of keys which, when plugged into the system, allow authentication. fnmatch (shell) style wildcards can be used.
+
+.P
+if the 'key' option is blank or missing, then the rule effectively becomes a 'deny' rule, as it will never match. If the 'rhosts' option is blank or missing, then the rule will not apply to any login that has a 'remote host' value (so presumably the rule will only apply to local logins). Similarly if the 'tty' rule is blank or missing, then the rule will not apply to any situation where a tty is involved. To make a rule apply to all ttys, or to all hosts, use of the '*' wildcard is supported. Match patterns can be negated by prepending a '!' character.
+.SH EXAMPLES
+
+.P
+Require a usbkey for all remote hosts. As tty= is not supplied, a usbkey is not needed for local login
+.nf
+
+.ti 10
+auth required pam_usbkey.so user=* rhosts=* key=12345678910
+.fi
+.ad b
+
+.P
+If alice's usb-key is plugged in, then she can log into tty1-4 without a password (sufficient). As an rhosts= option is not supplied, this rule would not apply to any remote host
+.nf
+
+.ti 10
+auth sufficient pam_usbkey.so user=alice tty=tty[1\-4] key=75957437595
+.fi
+.ad b
+
+.P
+Require a usbkey for users eve and mallory if they are logging in from any host that is not on the 192.168.*.* subnet. A choice of two keys is available.
+
+.nf
+
+.ti 10
+auth required pam_usbkey.so user=eve,mallory rhosts=!192.168.*.* key=12345678910,888383838
+.fi
+.ad b
+
+.P
+Require a usbkey for all users who are not bob
+.nf
+
+.ti 10
+auth required pam_usbkey.so user=!bob rhosts=* tty=* key=12345678910,888383838
+.fi
+.ad b
+
+.P
+Require a usbkey for all users whose names start with 'dev', and also for 'dev12345'
+.nf
+
+.ti 10
+auth required pam_usbkey.so user=!dev*,dev12345 rhosts=* tty=* key=12345678910,888383838
+.fi
+.ad b
+
+.P
+Require a usbkey for user eve to log in locally. The lack of an rhosts implies that this rule is used in a service that doesn't support remote login, but this is eve so who knows what might be going on here?
+.nf
+
+.ti 10
+auth required pam_usbkey.so user=eve tty=* key=75957437595
+.fi
+.ad b
+

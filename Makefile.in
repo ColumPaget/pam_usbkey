@@ -7,6 +7,8 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 bindir=@bindir@
 libdir=@libdir@
+mandir=@mandir@
+datarootdir=@datarootdir@
 sysconfdir=@sysconfdir@
 FLAGS=$(CFLAGS) @DEFS@
 
@@ -26,8 +28,10 @@ utility.o: utility.h utility.c
 install: pam_usbkey.so listusbkeys.sh
 	$(INSTALL) -d $(DESTDIR)$(bindir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)/security
+	$(INSTALL) -d $(DESTDIR)$(mandir)/man8
 	$(INSTALL) listusbkeys.sh $(DESTDIR)$(bindir)
 	$(INSTALL) pam_usbkey.so $(DESTDIR)$(libdir)/security
+	$(INSTALL) pam_usbkey.8 $(DESTDIR)$(mandir)/man8
 
 clean:
 	-rm -f *.o *.so
