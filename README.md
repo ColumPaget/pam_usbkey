@@ -1,10 +1,10 @@
-#PAM USBKEY
+# PAM USBKEY
 
 This is a simple PAM (Pluggable Authentication Modules) Module written as a learning exercise. The code is commented in the hope of providing a template for others to follow. It provides a "poor person's two-factor authentication" feature by checking that a pre-registered usb key is plugged into the system. Each usb-drive should have a unique serial number, and this module checks if a pre-registered drive is present. By editing the PAM configuration this module can be used to require a usb key be present in combination with the normal password in order to allow login, or su, or any other PAM aware service. It can also be used to provide passwordless login when a usb key is plugged in (which is probably crazy).
 
 
 
-#BIG FAT WARNING
+# BIG FAT WARNING
 
 Firstly, you should be aware that changing your PAM configuration could result in locking yourself out of your own computer systems if you get something wrong or  encounter some kind of weird error. If you forget to supply a key= option in the config, then you will have effectively created a 'deny' rule Thus you should first test this module on the 'su' configuration on a non-essential machine that allows root login on the vitual terminals tty1 tty2 ... ttyN. Thus, if something goes wrong, you'll still be able to log in as root and correct it.
 
@@ -97,6 +97,3 @@ Require a usbkey for user eve to log in locally. The lack of an rhosts implies t
 ```
 auth required pam_usbkey.so user=eve tty=* key=75957437595
 ```
-
-
-
