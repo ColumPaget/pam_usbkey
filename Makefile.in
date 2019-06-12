@@ -14,8 +14,7 @@ FLAGS=$(CFLAGS) @DEFS@
 all: pam_usbkey.so
 
 pam_usbkey.so: common.h usbkey.o utility.o pam_module.c 
-	$(CC) $(FLAGS) -c pam_module.c
-	ld -x --shared -lpam -opam_usbkey.so pam_module.o usbkey.o utility.o 
+	$(CC) $(FLAGS) -opam_usbkey.so -shared -lpam pam_module.c usbkey.o utility.o 
 	-strip pam_usbkey.so
 
 usbkey.o: usbkey.h usbkey.c
